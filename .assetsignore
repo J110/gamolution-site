@@ -1,6 +1,7 @@
 .git/
 .wrangler/
 docs/
+scripts/
 *.md
 og-image.svg
 wrangler.toml
