@@ -1,0 +1,5 @@
+name = "gamolution-site"
+compatibility_date = "2026-05-17"
+
+[assets]
+directory = "./"

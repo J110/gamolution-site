@@ -1,0 +1,9 @@
+.git/
+.wrangler/
+docs/
+*.md
+og-image.svg
+wrangler.toml
+.assetsignore
+.gitignore
+node_modules/
