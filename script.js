@@ -106,6 +106,22 @@
     });
   }
 
+  function fillCircleStatic(roles, ccx, ccy, r, density, color) {
+    for (var y = ccy - r; y < ccy + r; y += density) {
+      for (var x = ccx - r; x < ccx + r; x += density) {
+        var dx = x - ccx, dy = y - ccy;
+        if (dx * dx + dy * dy <= r * r) {
+          roles.push({
+            type: 'static',
+            x: x + (Math.random() - 0.5) * density * 0.6,
+            y: y + (Math.random() - 0.5) * density * 0.6,
+            color: color
+          });
+        }
+      }
+    }
+  }
+
   // ═══════════════════════════════════════════════════════════
   // CANVAS FACTORY
   // particle types: static / flow / walk · trail-fade rendering
@@ -1603,6 +1619,18 @@
     }
   }
 
+  function navLogoScene(W, H) {
+    var roles = [];
+    var cx = W / 2, cy = H / 2;
+    var R = Math.min(W, H) * 0.44;
+    addFlow(roles, pathCircle(cx, cy, R), 20, INK, 0.0018, 0.0032);
+    fillCircleStatic(roles, cx - R * 0.39, cy - R * 0.24, R * 0.22, 1.4, SAGE);
+    fillCircleStatic(roles, cx + R * 0.30, cy - R * 0.24, R * 0.18, 1.4, AMBER);
+    fillCircleStatic(roles, cx, cy + R * 0.35, R * 0.20, 1.4, SLATE);
+    addWalk(roles, cx, cy, R * 0.85, 5, SAGE_SOFT, 0.3);
+    return roles;
+  }
+
   // ═══════════════════════════════════════════════════════════
   // INSTANTIATE CANVASES
   // ═══════════════════════════════════════════════════════════
@@ -1656,6 +1684,13 @@
       N: 120, dotAlpha: 0.78, dotSize: 1.4, trailAlpha: 0.12, cycle: false
     });
   });
+
+  var navLogoCanvas = document.getElementById('navLogoCanvas');
+  if (navLogoCanvas) {
+    createDotCanvas(navLogoCanvas, [{ name: 'logo', fn: navLogoScene }], {
+      N: 110, dotAlpha: 0.9, dotSize: 1.0, trailAlpha: 0.15, cycle: false
+    });
+  }
 
   var tickEl = document.getElementById('tickNum');
   var tickN = 42;

@@ -27,9 +27,9 @@ a { color: inherit; text-decoration: none; }
 
 .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 22px var(--gutter); display: flex; align-items: center; justify-content: space-between; transition: all 0.4s var(--ease); }
 .nav.scrolled { background: rgba(250, 249, 246, 0.88); backdrop-filter: blur(16px); border-bottom: 1px solid var(--rule); padding: 16px var(--gutter); }
-.nav-brand { font-family: var(--font-display); font-size: 22px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 12px; }
-.nav-brand-mark { width: 28px; height: 28px; }
-.nav-brand-mark svg { display: block; }
+.nav-brand { font-family: var(--font-display); font-size: 22px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 14px; }
+.nav-brand-mark { width: 40px; height: 40px; display: block; flex-shrink: 0; }
+.nav-brand-mark canvas { display: block; width: 100%; height: 100%; }
 .nav-links { display: flex; gap: 38px; align-items: center; font-size: 14px; }
 .nav-link { color: var(--ink-soft); transition: color 0.3s var(--ease); position: relative; }
 .nav-link:hover { color: var(--ink); }
