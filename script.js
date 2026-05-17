@@ -1645,7 +1645,7 @@
       { name: 'Body politic', fn: sceneBodyPolitic },
       { name: 'Lineage', fn: sceneInheritance }
     ], {
-      N: 620, holdMs: 10000, dotAlpha: 0.7, dotSize: 1.6, trailAlpha: 0.06,
+      N: 620, holdMs: 6000, dotAlpha: 0.7, dotSize: 1.6, trailAlpha: 0.06,
       onSceneChange: function (idx, scene) {
         if (!worldNameEl) return;
         worldNameEl.style.opacity = '0';
