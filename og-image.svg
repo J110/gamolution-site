@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#faf9f6"/>
+  <g transform="translate(600 200)">
+    <circle cx="0" cy="0" r="84" fill="none" stroke="#1a1f1a" stroke-width="3"/>
+    <circle cx="-30" cy="-20" r="20" fill="#3d5a4a"/>
+    <circle cx="30" cy="-20" r="14" fill="#c08552"/>
+    <circle cx="0" cy="30" r="17" fill="#5d7a8a"/>
+  </g>
+  <text x="600" y="380" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="84" fill="#1a1f1a">Gamolution</text>
+  <text x="600" y="450" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="46" fill="#3d5a4a">Turn games into reality.</text>
+  <text x="600" y="510" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="20" fill="#88897e" letter-spacing="3">A POSSIBILITY ENGINE FOR HUMAN SYSTEMS</text>
+  <rect x="60" y="60" width="1080" height="510" fill="none" stroke="#1a1f1a" stroke-width="1" opacity="0.15"/>
+</svg>
