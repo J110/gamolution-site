@@ -1,14 +1,15 @@
 :root {
-  --paper: #faf9f6; --paper-warm: #f4f1ea; --paper-cool: #f0eee8;
-  --ink: #1a1f1a; --ink-soft: #4a5048; --ink-muted: #88897e; --ink-faint: #b8b8ac;
-  --sage: #3d5a4a; --sage-deep: #28392f; --sage-soft: #7a9388;
-  --amber: #c08552; --amber-soft: #d4a987; --terracotta: #b86e4f;
-  --slate: #5d7a8a; --slate-soft: #92a4b2;
-  --sand: #d8c5a0; --moss: #6e8a5a; --water: #8aaab8;
-  --rule: rgba(26, 31, 26, 0.08); --rule-strong: rgba(26, 31, 26, 0.16);
+  /* Cork & Navy theme (2026) — steel-blue accent, cork/clay warms, ivory ink on cork paper */
+  --paper: #615f5a; --paper-warm: #56544f; --paper-cool: #4a4843;
+  --ink: #eceae5; --ink-soft: rgba(236,234,229,.72); --ink-muted: rgba(236,234,229,.5); --ink-faint: rgba(236,234,229,.35);
+  --sage: #8fb0cc; --sage-deep: #7a9cb8; --sage-soft: #a8c0d4;
+  --amber: #cfae82; --amber-soft: #dfc4a0; --terracotta: #b96a56;
+  --slate: #a8a49c; --slate-soft: #c4c1ba;
+  --sand: #cfae82; --moss: #8a8f6a; --water: #8fb0cc;
+  --rule: rgba(236,234,229,.14); --rule-strong: rgba(236,234,229,.28);
   --font-display: 'Instrument Serif', Georgia, serif;
-  --font-body: 'Geist', -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Space Grotesk', -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
   --section-pad: clamp(80px, 11vw, 160px);
   --container: 1180px; --gutter: clamp(24px, 5vw, 56px);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -16,7 +17,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
 body { font-family: var(--font-body); background: var(--paper); color: var(--ink); line-height: 1.55; overflow-x: hidden; }
-::selection { background: var(--sage); color: var(--paper); }
+::selection { background: #2e4a66; color: #eceae5; }
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--paper-warm); }
 ::-webkit-scrollbar-thumb { background: var(--ink-faint); border-radius: 4px; }
@@ -26,7 +27,7 @@ a { color: inherit; text-decoration: none; }
 .eyebrow::before { content: ''; display: inline-block; width: 24px; height: 1px; background: var(--ink-soft); vertical-align: middle; margin-right: 14px; margin-bottom: 3px; }
 
 .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 22px var(--gutter); display: flex; align-items: center; justify-content: space-between; transition: all 0.4s var(--ease); }
-.nav.scrolled { background: rgba(250, 249, 246, 0.88); backdrop-filter: blur(16px); border-bottom: 1px solid var(--rule); padding: 16px var(--gutter); }
+.nav.scrolled { background: rgba(86,84,79,.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--rule); padding: 16px var(--gutter); }
 .nav-brand { font-family: var(--font-display); font-size: 22px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 14px; }
 .nav-brand-mark { width: 40px; height: 40px; display: block; flex-shrink: 0; }
 .nav-brand-mark canvas { display: block; width: 100%; height: 100%; }
@@ -91,7 +92,7 @@ a { color: inherit; text-decoration: none; }
 .mode { padding: 40px 28px 40px 0; border-bottom: 1px solid var(--rule); border-right: 1px solid var(--rule); display: flex; flex-direction: column; gap: 18px; transition: background 0.4s var(--ease); }
 .mode:nth-child(3) { border-right: none; padding-right: 0; }
 .mode:nth-child(n+2) { padding-left: 28px; }
-.mode:hover { background: rgba(61, 90, 74, 0.025); }
+.mode:hover { background: rgba(143,176,204,.04); }
 .mode-canvas { display: block; width: 100%; height: 140px; background: var(--paper); border-radius: 3px; border: 1px solid var(--rule); }
 .mode-number { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; font-weight: 500; }
 .mode:nth-child(1) .mode-number { color: var(--sage); }
@@ -234,3 +235,9 @@ a { color: inherit; text-decoration: none; }
   .hero-viewport-bar { padding: 10px 14px; font-size: 10px; flex-wrap: wrap; gap: 6px; }
   .cursor-trail { display: none; }
 }
+
+/* Foundations "sectional model" panel — plate settle + agent roam animations */
+@keyframes slabSettle { from { opacity: 0; transform: translateY(-22px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes roamA { 0% { transform: translate(0,0); } 25% { transform: translate(120px,30px); } 50% { transform: translate(200px,-14px); } 75% { transform: translate(80px,-40px); } 100% { transform: translate(0,0); } }
+@keyframes roamB { 0% { transform: translate(0,0); } 30% { transform: translate(-90px,26px); } 60% { transform: translate(-170px,-20px); } 100% { transform: translate(0,0); } }
+@keyframes roamC { 0% { transform: translate(0,0); } 40% { transform: translate(60px,-42px); } 70% { transform: translate(-60px,-16px); } 100% { transform: translate(0,0); } }

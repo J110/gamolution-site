@@ -13,39 +13,47 @@
     requestAnimationFrame(loop);
   })();
   var nav = document.getElementById('nav');
-  window.addEventListener('scroll', function () {
-    if (window.scrollY > 40) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
-  }, { passive: true });
+  function navScroll(e) {
+    var st = window.scrollY || (document.scrollingElement && document.scrollingElement.scrollTop) || 0;
+    if (!st && e && e.target && e.target.scrollTop) st = e.target.scrollTop;
+    if (st > 40) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
+  }
+  window.addEventListener('scroll', navScroll, { passive: true });
+  document.addEventListener('scroll', navScroll, true);
   var navToggle = document.getElementById('navToggle');
   var navLinks = document.getElementById('navLinks');
   navToggle.addEventListener('click', function () { navLinks.classList.toggle('open'); });
   document.querySelectorAll('.nav-link, .nav-cta').forEach(function (l) {
     l.addEventListener('click', function () { navLinks.classList.remove('open'); });
   });
-  var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (e) {
-      if (e.isIntersecting) {
-        var idx = Array.from(e.target.parentNode.children).indexOf(e.target);
-        e.target.style.transitionDelay = Math.min(idx * 0.06, 0.4) + 's';
-        e.target.classList.add('visible');
-        io.unobserve(e.target);
+  // rect-based reveal (IntersectionObserver is unreliable in embedded viewports)
+  function checkReveal() {
+    document.querySelectorAll('.reveal:not(.visible)').forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight - 60 && r.bottom > 0) {
+        var idx = Array.prototype.indexOf.call(el.parentNode.children, el);
+        el.style.transitionDelay = Math.min(idx * 0.06, 0.4) + 's';
+        el.classList.add('visible');
       }
     });
-  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
-  document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+  }
+  checkReveal();
+  document.addEventListener('scroll', checkReveal, true);
+  window.addEventListener('resize', checkReveal);
+  setInterval(checkReveal, 500);
 
   // ═══════════════════════════════════════════════════════════
   // PALETTE
   // ═══════════════════════════════════════════════════════════
-  var SAGE = { r: 61, g: 90, b: 74 };
-  var SAGE_SOFT = { r: 122, g: 147, b: 136 };
-  var AMBER = { r: 192, g: 133, b: 82 };
-  var AMBER_SOFT = { r: 212, g: 169, b: 135 };
-  var SLATE = { r: 93, g: 122, b: 138 };
-  var SLATE_SOFT = { r: 146, g: 164, b: 178 };
-  var TERRA = { r: 184, g: 110, b: 79 };
-  var MOSS = { r: 110, g: 138, b: 90 };
-  var INK = { r: 26, g: 31, b: 26 };
+  var SAGE = { r: 143, g: 176, b: 204 };
+  var SAGE_SOFT = { r: 168, g: 192, b: 212 };
+  var AMBER = { r: 207, g: 174, b: 130 };
+  var AMBER_SOFT = { r: 223, g: 196, b: 160 };
+  var SLATE = { r: 46, g: 74, b: 102 };
+  var SLATE_SOFT = { r: 122, g: 149, b: 173 };
+  var TERRA = { r: 185, g: 106, b: 86 };
+  var MOSS = { r: 138, g: 143, b: 106 };
+  var INK = { r: 236, g: 234, b: 229 };
 
   // ═══════════════════════════════════════════════════════════
   // PATH FUNCTIONS — parametric t∈[0,1] → {x, y}
@@ -135,7 +143,7 @@
     var holdMs = opts.holdMs || 9000;
     var dotSize = opts.dotSize || 1.6;
     var trailAlpha = opts.trailAlpha || 0.08;
-    var bgRGB = opts.bgRGB || '250, 249, 246';
+    var bgRGB = opts.bgRGB || '97, 95, 90';
     var dotAlpha = opts.dotAlpha || 0.75;
     var cycle = opts.cycle !== false;
     var onSceneChange = opts.onSceneChange || null;
@@ -247,12 +255,10 @@
       resize();
       if (scenes.length > 0) applyScene(scenes[sceneIdx]);
     });
-    if ('IntersectionObserver' in window) {
-      var observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) { running = e.isIntersecting; });
-      });
-      observer.observe(canvas);
-    }
+    setInterval(function () {
+      var r = canvas.getBoundingClientRect();
+      running = r.bottom > -80 && r.top < window.innerHeight + 80;
+    }, 400);
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -1181,7 +1187,7 @@
       ctx.lineTo(aN.x, aN.y); ctx.lineTo(aS.x, aS.y);
       ctx.closePath(); ctx.fill();
       // Outlines
-      ctx.strokeStyle = 'rgba(26, 31, 26, 0.5)';
+      ctx.strokeStyle = 'rgba(50, 48, 44, 0.5)';
       ctx.lineWidth = 0.8;
       ctx.lineJoin = 'round';
       ctx.beginPath();
@@ -1207,33 +1213,33 @@
     }
     function drawTree(gx, gy) {
       var base = iso(gx, gy, 0);
-      ctx.fillStyle = 'rgba(26, 31, 26, 0.13)';
+      ctx.fillStyle = 'rgba(50, 48, 44, 0.13)';
       ctx.beginPath(); ctx.ellipse(base.x, base.y, 7, 3, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#8a6d4e';
+      ctx.fillStyle = '#8c6a40';
       ctx.fillRect(base.x - 1.6, base.y - 9, 3.2, 9);
-      ctx.fillStyle = '#6e8a5a';
+      ctx.fillStyle = '#8a8f6a';
       ctx.beginPath();
       ctx.arc(base.x - 4, base.y - 11, 5, 0, Math.PI * 2);
       ctx.arc(base.x + 4, base.y - 11, 5, 0, Math.PI * 2);
       ctx.arc(base.x, base.y - 15, 6, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = 'rgba(26, 31, 26, 0.4)';
+      ctx.strokeStyle = 'rgba(50, 48, 44, 0.4)';
       ctx.lineWidth = 0.7;
       ctx.stroke();
     }
 
     var houses = [
-      [-6, -3.5, 1.5, 1.5, 10, 5, '#c08552', '#8b5e3c'],
-      [-4, -3.5, 1.5, 1.5, 10, 5, '#c08552', '#8b5e3c'],
-      [-1.5, -3.5, 1.5, 1.5, 13, 6, '#d4a987', '#a06b48'],
-      [1.5, -3.5, 1.5, 1.5, 13, 6, '#d4a987', '#a06b48'],
-      [3.5, -3.2, 1.5, 1.5, 11, 5, '#c08552', '#8b5e3c'],
-      [-6, -0.5, 1.5, 1.5, 14, 6, '#92a4b2', '#5d7a8a'],
-      [-1.5, -0.5, 1.6, 1.6, 18, 7, '#92a4b2', '#5d7a8a'],
-      [1.5, -0.5, 1.6, 1.6, 18, 7, '#92a4b2', '#5d7a8a'],
-      [3.5, -0.5, 1.5, 1.5, 12, 5, '#7a9388', '#3d5a4a'],
-      [-4, 2.5, 1.5, 1.5, 10, 4, '#7a9388', '#3d5a4a'],
-      [1.5, 2.5, 1.5, 1.5, 10, 4, '#7a9388', '#3d5a4a']
+      [-6, -3.5, 1.5, 1.5, 10, 5, '#b69162', '#8c6a40'],
+      [-4, -3.5, 1.5, 1.5, 10, 5, '#b69162', '#8c6a40'],
+      [-1.5, -3.5, 1.5, 1.5, 13, 6, '#cfae82', '#a37f50'],
+      [1.5, -3.5, 1.5, 1.5, 13, 6, '#cfae82', '#a37f50'],
+      [3.5, -3.2, 1.5, 1.5, 11, 5, '#b69162', '#8c6a40'],
+      [-6, -0.5, 1.5, 1.5, 14, 6, '#7a95ad', '#2e4a66'],
+      [-1.5, -0.5, 1.6, 1.6, 18, 7, '#7a95ad', '#2e4a66'],
+      [1.5, -0.5, 1.6, 1.6, 18, 7, '#7a95ad', '#2e4a66'],
+      [3.5, -0.5, 1.5, 1.5, 12, 5, '#a8c0d4', '#8fb0cc'],
+      [-4, 2.5, 1.5, 1.5, 10, 4, '#a8c0d4', '#8fb0cc'],
+      [1.5, 2.5, 1.5, 1.5, 10, 4, '#a8c0d4', '#8fb0cc']
     ];
     var trees = [[-2.5, 1], [2.5, 1], [-3, 4], [3, 4]];
     var agents = [];
@@ -1241,23 +1247,23 @@
       agents.push({
         gx: -6 + Math.random() * 12, gy: -3 + Math.random() * 7,
         vx: (Math.random() - 0.5) * 0.025, vy: (Math.random() - 0.5) * 0.025,
-        c: ['#3d5a4a', '#c08552', '#5d7a8a', '#b86e4f'][Math.floor(Math.random() * 4)]
+        c: ['#8fb0cc', '#b69162', '#2e4a66', '#b96a56'][Math.floor(Math.random() * 4)]
       });
     }
 
     function draw() {
       if (!running) { requestAnimationFrame(draw); return; }
-      ctx.fillStyle = '#f4f1ea';
+      ctx.fillStyle = '#56544f';
       ctx.fillRect(0, 0, W, H);
       // Grass base
       for (var gx = -7; gx < 6; gx++) {
-        for (var gy = -4; gy < 5; gy++) drawTile(gx, gy, '#dde3d3');
+        for (var gy = -4; gy < 5; gy++) drawTile(gx, gy, '#787d66');
       }
       // Roads
-      for (var gx = -7; gx < 6; gx++) { drawTile(gx, -2, '#b8b8ac'); drawTile(gx, 1.5, '#b8b8ac'); }
-      for (var gy = -4; gy < 5; gy++) { drawTile(-3, gy, '#b8b8ac'); drawTile(0, gy, '#b8b8ac'); drawTile(3, gy, '#b8b8ac'); }
+      for (var gx = -7; gx < 6; gx++) { drawTile(gx, -2, '#8c8880'); drawTile(gx, 1.5, '#8c8880'); }
+      for (var gy = -4; gy < 5; gy++) { drawTile(-3, gy, '#8c8880'); drawTile(0, gy, '#8c8880'); drawTile(3, gy, '#8c8880'); }
       // Grid lines (very faint)
-      ctx.strokeStyle = 'rgba(26, 31, 26, 0.05)'; ctx.lineWidth = 0.5;
+      ctx.strokeStyle = 'rgba(50, 48, 44, 0.05)'; ctx.lineWidth = 0.5;
       for (var gx = -7; gx <= 6; gx++) {
         var p1 = iso(gx, -4, 0), p2 = iso(gx, 5, 0);
         ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
@@ -1285,11 +1291,10 @@
     }
     resize(); draw();
     window.addEventListener('resize', resize);
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) { running = e.isIntersecting; });
-      }).observe(canvas);
-    }
+    setInterval(function () {
+      var r = canvas.getBoundingClientRect();
+      running = r.bottom > -80 && r.top < window.innerHeight + 80;
+    }, 400);
   }
 
   // ── PLATFORM: control panel with animated chart, knobs, bars, dial ──
@@ -1312,11 +1317,12 @@
     var k2 = Math.PI / 3, k2T = Math.PI / 3;
     var dA = Math.PI * 1.5, dAT = Math.PI * 1.5;
 
-    var INK = '#1a1f1a', BG = '#faf9f6';
-    var SAGE = '#3d5a4a', AMBER = '#c08552', TERRA = '#b86e4f', SLATE = '#5d7a8a', MOSS = '#6e8a5a';
+    var INK = '#eceae5', BG = '#615f5a';
+    var SAGE = '#8fb0cc', AMBER = '#b69162', TERRA = '#b96a56', SLATE = '#2e4a66', MOSS = '#8a8f6a';
 
     function draw() {
       if (!running) { requestAnimationFrame(draw); return; }
+      if (W < 60 || H < 60) { resize(); requestAnimationFrame(draw); return; }
       t++;
       if (t % 3 === 0) {
         chart.shift();
@@ -1343,7 +1349,7 @@
       // TOP-LEFT: scrolling line chart
       var cx0 = pad + 8, cy0 = pad + 8, cx1 = W / 2 - 6, cy1 = H / 2 - 8;
       var cw = cx1 - cx0, ch = cy1 - cy0;
-      ctx.strokeStyle = 'rgba(26, 31, 26, 0.1)'; ctx.lineWidth = 0.5;
+      ctx.strokeStyle = 'rgba(50, 48, 44, 0.1)'; ctx.lineWidth = 0.5;
       for (var i = 1; i < 4; i++) {
         var y = cy0 + ch * i / 4;
         ctx.beginPath(); ctx.moveTo(cx0, y); ctx.lineTo(cx1, y); ctx.stroke();
@@ -1364,6 +1370,7 @@
 
       // TOP-RIGHT: two knobs
       function drawKnob(kx, ky, kr, ang, color) {
+        kr = Math.max(kr, 6);
         ctx.strokeStyle = INK; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.arc(kx, ky, kr, 0, Math.PI * 2); ctx.stroke();
         ctx.fillStyle = color;
@@ -1442,7 +1449,7 @@
           y: mt * mt * mt * p0.y + 3 * mt * mt * t * p1.y + 3 * mt * t * t * p2.y + t * t * t * p3.y
         };
       }
-      ctx.strokeStyle = 'rgba(192, 133, 82, 0.18)'; ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(207, 174, 130, 0.18)'; ctx.lineWidth = 1;
       // Chart → knobs
       var s1a = { x: cx1, y: lastY };
       var s1b = { x: qcx - kr * 1.5, y: qcy + kr };
@@ -1483,11 +1490,10 @@
     }
     resize(); draw();
     window.addEventListener('resize', resize);
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) { running = e.isIntersecting; });
-      }).observe(canvas);
-    }
+    setInterval(function () {
+      var r = canvas.getBoundingClientRect();
+      running = r.bottom > -80 && r.top < window.innerHeight + 80;
+    }, 400);
   }
 
   // ── VITRUVIAN: rendered Da Vinci figure with filled body, both arm/leg poses ──
@@ -1503,8 +1509,8 @@
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
       cx = W / 2; cy = H / 2; R = Math.min(W, H) * 0.42;
     }
-    var INK = '#1a1f1a', BG = '#faf9f6';
-    var SAGE = '#3d5a4a', TERRA = '#b86e4f', AMBER = '#c08552', MOSS = '#6e8a5a';
+    var INK = '#eceae5', BG = '#615f5a';
+    var SAGE = '#8fb0cc', TERRA = '#b96a56', AMBER = '#b69162', MOSS = '#8a8f6a';
 
     function draw() {
       if (!running) { requestAnimationFrame(draw); return; }
@@ -1532,12 +1538,12 @@
       var footSpreadR = { x: cx + Math.sin(spreadAng) * R, y: cy + Math.cos(spreadAng) * R };
 
       // Outer circle
-      ctx.strokeStyle = 'rgba(26, 31, 26, 0.75)'; ctx.lineWidth = 1.3;
+      ctx.strokeStyle = 'rgba(50, 48, 44, 0.75)'; ctx.lineWidth = 1.3;
       ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
       // Inscribed square (offset so navel = circle center)
       ctx.strokeRect(cx - sqHalf, headTopY, sqHalf * 2, bodyH);
       // Proportion lines
-      ctx.strokeStyle = 'rgba(61, 90, 74, 0.15)'; ctx.lineWidth = 0.5;
+      ctx.strokeStyle = 'rgba(143, 176, 204, 0.15)'; ctx.lineWidth = 0.5;
       [-0.42, -0.2, 0, 0.2, 0.42].forEach(function (off) {
         var y = cy + R * off;
         ctx.beginPath(); ctx.moveTo(cx - sqHalf + 4, y); ctx.lineTo(cx + sqHalf - 4, y); ctx.stroke();
@@ -1582,7 +1588,7 @@
       ctx.fillStyle = SAGE;
       ctx.beginPath(); ctx.arc(cx, headCY, headR, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.stroke();
-      ctx.strokeStyle = 'rgba(26, 31, 26, 0.4)'; ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(50, 48, 44, 0.4)'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(cx, headCY, headR - 3, Math.PI, Math.PI * 2); ctx.stroke();
 
       // Heart inside torso (pulsing)
@@ -1612,11 +1618,10 @@
     }
     resize(); draw();
     window.addEventListener('resize', resize);
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) { running = e.isIntersecting; });
-      }).observe(canvas);
-    }
+    setInterval(function () {
+      var r = canvas.getBoundingClientRect();
+      running = r.bottom > -80 && r.top < window.innerHeight + 80;
+    }, 400);
   }
 
   function navLogoScene(W, H) {
