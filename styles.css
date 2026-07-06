@@ -1,12 +1,12 @@
 :root {
-  /* Cork & Navy theme (2026) — steel-blue accent, cork/clay warms, ivory ink on cork paper */
-  --paper: #615f5a; --paper-warm: #56544f; --paper-cool: #4a4843;
-  --ink: #eceae5; --ink-soft: rgba(236,234,229,.72); --ink-muted: rgba(236,234,229,.5); --ink-faint: rgba(236,234,229,.35);
-  --sage: #8fb0cc; --sage-deep: #7a9cb8; --sage-soft: #a8c0d4;
-  --amber: #cfae82; --amber-soft: #dfc4a0; --terracotta: #b96a56;
-  --slate: #a8a49c; --slate-soft: #c4c1ba;
-  --sand: #cfae82; --moss: #8a8f6a; --water: #8fb0cc;
-  --rule: rgba(236,234,229,.14); --rule-strong: rgba(236,234,229,.28);
+  /* Cork & Navy (Light) theme (2026) — steel-blue accent, cork/clay warms, dark warm ink on ivory paper */
+  --paper: #eceae5; --paper-warm: #e3e0d8; --paper-cool: #dbd7cd;
+  --ink: #3a3833; --ink-soft: #5a5750; --ink-muted: #8c8880; --ink-faint: #b5b1a6;
+  --sage: #4a7196; --sage-deep: #3a5c7d; --sage-soft: #8fb0cc;
+  --amber: #a37f50; --amber-soft: #cfae82; --terracotta: #b96a56;
+  --slate: #6d6a62; --slate-soft: #8c8880;
+  --sand: #cfae82; --moss: #7a8060; --water: #4a7196;
+  --rule: rgba(58,56,51,.12); --rule-strong: rgba(58,56,51,.24);
   --font-display: 'Instrument Serif', Georgia, serif;
   --font-body: 'Space Grotesk', -apple-system, sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
@@ -27,7 +27,7 @@ a { color: inherit; text-decoration: none; }
 .eyebrow::before { content: ''; display: inline-block; width: 24px; height: 1px; background: var(--ink-soft); vertical-align: middle; margin-right: 14px; margin-bottom: 3px; }
 
 .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 22px var(--gutter); display: flex; align-items: center; justify-content: space-between; transition: all 0.4s var(--ease); }
-.nav.scrolled { background: rgba(86,84,79,.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--rule); padding: 16px var(--gutter); }
+.nav.scrolled { background: rgba(236,234,229,.9); backdrop-filter: blur(16px); border-bottom: 1px solid var(--rule); padding: 16px var(--gutter); }
 .nav-brand { font-family: var(--font-display); font-size: 22px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 14px; }
 .nav-brand-mark { width: 40px; height: 40px; display: block; flex-shrink: 0; }
 .nav-brand-mark canvas { display: block; width: 100%; height: 100%; }
@@ -92,7 +92,7 @@ a { color: inherit; text-decoration: none; }
 .mode { padding: 40px 28px 40px 0; border-bottom: 1px solid var(--rule); border-right: 1px solid var(--rule); display: flex; flex-direction: column; gap: 18px; transition: background 0.4s var(--ease); }
 .mode:nth-child(3) { border-right: none; padding-right: 0; }
 .mode:nth-child(n+2) { padding-left: 28px; }
-.mode:hover { background: rgba(143,176,204,.04); }
+.mode:hover { background: rgba(74,113,150,.045); }
 .mode-canvas { display: block; width: 100%; height: 140px; background: var(--paper); border-radius: 3px; border: 1px solid var(--rule); }
 .mode-number { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; font-weight: 500; }
 .mode:nth-child(1) .mode-number { color: var(--sage); }
@@ -199,20 +199,20 @@ a { color: inherit; text-decoration: none; }
 .manifest-text .ink-faint { color: var(--ink-faint); }
 .manifest-rule { width: 60px; height: 1px; background: var(--sage); margin: 56px auto; }
 
-.contact { background: var(--paper-cool); color: var(--ink); text-align: center; padding: var(--section-pad) var(--gutter); }
+.contact { background: var(--ink); color: var(--paper); text-align: center; padding: var(--section-pad) var(--gutter); }
 .contact-title { font-family: var(--font-display); font-size: clamp(40px, 6vw, 80px); line-height: 1.05; margin-bottom: 28px; letter-spacing: -0.02em; }
 .contact-title em { font-style: italic; color: var(--amber-soft); }
-.contact-text { color: var(--ink-soft); font-size: 17px; max-width: 540px; margin: 0 auto 48px; line-height: 1.65; }
+.contact-text { color: rgba(250, 249, 246, 0.65); font-size: 17px; max-width: 540px; margin: 0 auto 48px; line-height: 1.65; }
 .contact-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 64px; }
-.btn-contact { background: var(--ink); color: var(--paper-cool); padding: 16px 32px; }
+.btn-contact { background: var(--paper); color: var(--ink); padding: 16px 32px; }
 .btn-contact:hover { background: var(--amber-soft); transform: translateY(-2px); }
-.btn-contact-secondary { background: transparent; color: var(--ink); border-color: var(--rule-strong); }
-.btn-contact-secondary:hover { border-color: var(--ink); background: rgba(236, 234, 229, 0.06); }
-.contact-meta { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; padding-top: 40px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--ink-muted); font-family: var(--font-mono); }
+.btn-contact-secondary { background: transparent; color: var(--paper); border-color: rgba(250, 249, 246, 0.2); }
+.btn-contact-secondary:hover { border-color: var(--paper); background: rgba(250, 249, 246, 0.05); }
+.contact-meta { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; padding-top: 40px; border-top: 1px solid rgba(250, 249, 246, 0.1); font-size: 13px; color: rgba(250, 249, 246, 0.5); font-family: var(--font-mono); }
 
-.footer { background: var(--paper-cool); color: var(--ink-soft); padding: 56px var(--gutter) 36px; border-top: 1px solid var(--rule); }
+.footer { background: var(--ink); color: rgba(250, 249, 246, 0.6); padding: 56px var(--gutter) 36px; border-top: 1px solid rgba(250, 249, 246, 0.08); }
 .footer-inner { max-width: var(--container); margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 28px; }
-.footer-brand { font-family: var(--font-display); font-size: 20px; color: var(--ink); display: flex; align-items: center; gap: 12px; }
+.footer-brand { font-family: var(--font-display); font-size: 20px; color: var(--paper); display: flex; align-items: center; gap: 12px; }
 .footer-brand em { font-style: italic; color: var(--amber-soft); font-size: 15px; margin-left: 8px; }
 .footer-text { font-size: 13px; font-family: var(--font-mono); letter-spacing: 0.04em; }
 

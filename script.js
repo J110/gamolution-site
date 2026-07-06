@@ -45,15 +45,15 @@
   // ═══════════════════════════════════════════════════════════
   // PALETTE
   // ═══════════════════════════════════════════════════════════
-  var SAGE = { r: 143, g: 176, b: 204 };
-  var SAGE_SOFT = { r: 168, g: 192, b: 212 };
+  var SAGE = { r: 74, g: 113, b: 150 };
+  var SAGE_SOFT = { r: 143, g: 176, b: 204 };
   var AMBER = { r: 207, g: 174, b: 130 };
   var AMBER_SOFT = { r: 223, g: 196, b: 160 };
   var SLATE = { r: 46, g: 74, b: 102 };
   var SLATE_SOFT = { r: 122, g: 149, b: 173 };
   var TERRA = { r: 185, g: 106, b: 86 };
   var MOSS = { r: 138, g: 143, b: 106 };
-  var INK = { r: 236, g: 234, b: 229 };
+  var INK = { r: 58, g: 56, b: 51 };
 
   // ═══════════════════════════════════════════════════════════
   // PATH FUNCTIONS — parametric t∈[0,1] → {x, y}
@@ -143,7 +143,7 @@
     var holdMs = opts.holdMs || 9000;
     var dotSize = opts.dotSize || 1.6;
     var trailAlpha = opts.trailAlpha || 0.08;
-    var bgRGB = opts.bgRGB || '97, 95, 90';
+    var bgRGB = opts.bgRGB || '236, 234, 229';
     var dotAlpha = opts.dotAlpha || 0.75;
     var cycle = opts.cycle !== false;
     var onSceneChange = opts.onSceneChange || null;
@@ -178,8 +178,19 @@
     }
     function applyScene(scene) {
       var roles = scene.fn(W, H);
+      var padStatic = opts.padStatic && roles.length > 0;
       while (roles.length < N) {
-        roles.push({ type: 'walk', cx: W / 2, cy: H / 2, r: Math.min(W, H) * 0.45, color: SAGE_SOFT, walkSpeed: 0.3 });
+        if (padStatic) {
+          // surplus agents thicken the figure itself — no ambient walkers
+          var src = roles[Math.floor(Math.random() * roles.length)];
+          if (src.type === 'static') {
+            roles.push({ type: 'static', x: src.x + (Math.random() - 0.5) * 5, y: src.y + (Math.random() - 0.5) * 5, color: src.color });
+          } else {
+            roles.push(src);
+          }
+        } else {
+          roles.push({ type: 'walk', cx: W / 2, cy: H / 2, r: Math.min(W, H) * 0.45, color: SAGE_SOFT, walkSpeed: 0.3 });
+        }
       }
       for (var i = roles.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
@@ -835,172 +846,143 @@
   function engineRingScene(W, H) {
     var roles = [];
     var cx = W / 2, cy = H / 2;
-    var R = Math.min(W, H) * 0.42;
+    var R = Math.min(W, H) * 0.44;
 
-    // ── Geometry: navel at circle center; square offset upward ──
-    var bodyH = R * 1.4, sqHalf = bodyH / 2;
-    var feetY = cy + R * 0.58, headTopY = feetY - bodyH;
-    var headR = R * 0.14, headCY = headTopY + headR + R * 0.02;
-    var shouldersY = headCY + headR * 1.45;
-    var shoulderHalf = R * 0.24;
-    var waistY = cy - R * 0.03, waistHalf = R * 0.13;
-    var hipsY = cy + R * 0.18, hipsHalf = R * 0.18;
-    var raisedAng = Math.PI * 0.22, spreadAng = Math.PI * 0.2;
+    // Proportions matched to the classic drawing: the man spans the circle —
+    // head at circle top, feet-together at circle bottom, navel at dead center.
+    var feetY = cy + R * 0.985, headTopY = cy - R * 0.985;
+    var sqHalf = R * 0.83, sqTop = feetY - sqHalf * 2;
+    var headR = R * 0.1, headCY = headTopY + headR * 1.05;
+    var shouldersY = cy - R * 0.5, shoulderHalf = R * 0.23;
+    var waistY = cy + R * 0.03, waistHalf = R * 0.135;
+    var hipsY = cy + R * 0.22, hipsHalf = R * 0.16;
+    var raisedAng = 0.72, spreadAng = Math.PI * 0.155;
 
-    // ── Outer circle and square: traced by flow agents ──
-    addFlow(roles, pathCircle(cx, cy, R), 44, INK, 0.0006, 0.0012);
+    // ── Frame: circle + square + guide lines ──
+    addFlow(roles, pathCircle(cx, cy, R), 46, INK, 0.0006, 0.0012);
     var sqPts = [
-      { x: cx - sqHalf, y: headTopY }, { x: cx + sqHalf, y: headTopY },
+      { x: cx - sqHalf, y: sqTop }, { x: cx + sqHalf, y: sqTop },
       { x: cx + sqHalf, y: feetY }, { x: cx - sqHalf, y: feetY }
     ];
     for (var i = 0; i < 4; i++) {
-      addFlow(roles, pathLine(sqPts[i], sqPts[(i + 1) % 4]), 11, INK, 0.0006, 0.0012);
+      addFlow(roles, pathLine(sqPts[i], sqPts[(i + 1) % 4]), 12, INK, 0.0006, 0.0012);
     }
-    // Faint proportion lines
-    [-0.4, -0.2, 0.2, 0.4].forEach(function (off) {
-      var y = cy + R * off;
+    [shouldersY, cy, hipsY, cy + R * 0.58].forEach(function (y) {
       addFlow(roles, pathLine({ x: cx - sqHalf + 4, y: y }, { x: cx + sqHalf - 4, y: y }), 2, SAGE_SOFT, 0.0008, 0.0014);
     });
 
-    // ── Polygon-fill helpers ──
-    function pointInPolygon(p, poly) {
-      var inside = false;
-      for (var i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-        var xi = poly[i].x, yi = poly[i].y, xj = poly[j].x, yj = poly[j].y;
-        if (((yi > p.y) !== (yj > p.y)) && (p.x < (xj - xi) * (p.y - yi) / (yj - yi) + xi)) inside = !inside;
+    // ── Contour-flow helpers ──
+    function pathPoly(pts, closed) {
+      var arr = closed ? pts.concat([pts[0]]) : pts;
+      var segs = [], total = 0;
+      for (var i = 0; i < arr.length - 1; i++) {
+        var dx = arr[i + 1].x - arr[i].x, dy = arr[i + 1].y - arr[i].y;
+        var l = Math.sqrt(dx * dx + dy * dy) || 0.001;
+        segs.push({ a: arr[i], b: arr[i + 1], l: l, start: total });
+        total += l;
       }
-      return inside;
-    }
-    function fillPoly(poly, density, color) {
-      var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-      poly.forEach(function (p) {
-        if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
-        if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
-      });
-      for (var y = minY; y < maxY; y += density) {
-        for (var x = minX; x < maxX; x += density) {
-          var jx = x + (Math.random() - 0.5) * density * 0.6;
-          var jy = y + (Math.random() - 0.5) * density * 0.6;
-          if (pointInPolygon({ x: jx, y: jy }, poly)) {
-            roles.push({ type: 'static', x: jx, y: jy, color: color });
+      return {
+        len: total,
+        fn: function (t) {
+          var dTot = Math.max(0, Math.min(0.9999, t)) * total;
+          for (var i = 0; i < segs.length; i++) {
+            var s = segs[i];
+            if (dTot <= s.start + s.l) {
+              var u = (dTot - s.start) / s.l;
+              return { x: s.a.x + (s.b.x - s.a.x) * u, y: s.a.y + (s.b.y - s.a.y) * u };
+            }
           }
+          return arr[arr.length - 1];
         }
-      }
+      };
     }
-    function fillCircle(ccx, ccy, r, density, color) {
-      for (var y = ccy - r; y < ccy + r; y += density) {
-        for (var x = ccx - r; x < ccx + r; x += density) {
-          var dx = x - ccx, dy = y - ccy;
-          if (dx * dx + dy * dy <= r * r) {
-            var jx = x + (Math.random() - 0.5) * density * 0.6;
-            var jy = y + (Math.random() - 0.5) * density * 0.6;
-            roles.push({ type: 'static', x: jx, y: jy, color: color });
-          }
+    function flowPoly(pts, closed, color, spacing) {
+      var p = pathPoly(pts, closed);
+      addFlow(roles, p.fn, Math.max(3, Math.round(p.len / (spacing || 5.5))), color, 0.0007, 0.0014);
+    }
+    function flowCircle(x, y, r, color, spacing) {
+      addFlow(roles, pathCircle(x, y, r), Math.max(4, Math.round(2 * Math.PI * r / (spacing || 5))), color, 0.0009, 0.0018);
+    }
+    function lerp(p0, p1, t) { return { x: p0.x + (p1.x - p0.x) * t, y: p0.y + (p1.y - p0.y) * t }; }
+    function flowLimb(joints, widths, color) {
+      var edgeA = [], edgeB = [];
+      for (var i = 0; i < joints.length - 1; i++) {
+        var dx = joints[i + 1].x - joints[i].x, dy = joints[i + 1].y - joints[i].y;
+        var l = Math.sqrt(dx * dx + dy * dy), nx = -dy / l, ny = dx / l;
+        if (i === 0) {
+          edgeA.push({ x: joints[0].x + nx * widths[0], y: joints[0].y + ny * widths[0] });
+          edgeB.push({ x: joints[0].x - nx * widths[0], y: joints[0].y - ny * widths[0] });
         }
+        edgeA.push({ x: joints[i + 1].x + nx * widths[i + 1], y: joints[i + 1].y + ny * widths[i + 1] });
+        edgeB.push({ x: joints[i + 1].x - nx * widths[i + 1], y: joints[i + 1].y - ny * widths[i + 1] });
       }
-    }
-    function limbPoly(p0, p1, hwStart, hwEnd) {
-      var dx = p1.x - p0.x, dy = p1.y - p0.y;
-      var len = Math.sqrt(dx * dx + dy * dy);
-      var nx = -dy / len, ny = dx / len;
-      return [
-        { x: p0.x + nx * hwStart, y: p0.y + ny * hwStart },
-        { x: p1.x + nx * hwEnd, y: p1.y + ny * hwEnd },
-        { x: p1.x - nx * hwEnd, y: p1.y - ny * hwEnd },
-        { x: p0.x - nx * hwStart, y: p0.y - ny * hwStart }
-      ];
+      flowPoly(edgeA, false, color, 5.5);
+      flowPoly(edgeB, false, color, 5.5);
     }
 
-    var d = 7;  // dot spacing
+    // ── Head: skull + hair hugging the crown + neck into trapezius ──
+    flowCircle(cx, headCY, headR, INK, 4);
+    addFlow(roles, pathArc(cx, headCY, headR * 1.22, Math.PI * 1.06, Math.PI * 1.94), 12, INK, 0.001, 0.002);
+    addFlow(roles, pathArc(cx, headCY, headR * 1.42, Math.PI * 1.24, Math.PI * 1.76), 7, INK, 0.001, 0.002);
+    flowPoly([{ x: cx - headR * 0.45, y: headCY + headR * 1.1 }, { x: cx - shoulderHalf * 0.68, y: shouldersY }], false, INK, 5);
+    flowPoly([{ x: cx + headR * 0.45, y: headCY + headR * 1.1 }, { x: cx + shoulderHalf * 0.68, y: shouldersY }], false, INK, 5);
 
-    // ── Head (oval-ish from overlapping circles) ──
-    fillCircle(cx, headCY, headR, d, INK);
-    fillCircle(cx, headCY + headR * 0.4, headR * 0.85, d, INK);  // jaw
-
-    // ── Curly hair tufts above head ──
-    [
-      { x: -0.6, y: -0.4, r: 0.55 }, { x: -0.3, y: -0.6, r: 0.5 },
-      { x: 0, y: -0.7, r: 0.55 }, { x: 0.3, y: -0.6, r: 0.5 },
-      { x: 0.6, y: -0.4, r: 0.55 }, { x: -0.55, y: -0.15, r: 0.4 },
-      { x: 0.55, y: -0.15, r: 0.4 }
-    ].forEach(function (h) {
-      fillCircle(cx + headR * h.x * 1.4, headCY + headR * h.y, headR * h.r, d, INK);
-    });
-
-    // ── Neck ──
-    fillPoly(limbPoly({ x: cx, y: headCY + headR * 1.2 }, { x: cx, y: shouldersY + 2 }, 8, 11), d, INK);
-
-    // ── Torso (curvy hourglass via more points) ──
-    var torsoPoly = [
+    // ── Torso: outline only — neck slope, chest swell, waist pinch, hip, groin V ──
+    flowPoly([
       { x: cx - shoulderHalf, y: shouldersY },
-      { x: cx - shoulderHalf * 0.95, y: shouldersY + R * 0.04 },
-      { x: cx - shoulderHalf * 0.75, y: shouldersY + R * 0.16 },
+      { x: cx - shoulderHalf * 0.97, y: shouldersY + R * 0.07 },
+      { x: cx - shoulderHalf * 0.8, y: shouldersY + R * 0.16 },
+      { x: cx - waistHalf * 1.25, y: cy - R * 0.14 },
       { x: cx - waistHalf, y: waistY },
-      { x: cx - hipsHalf * 0.95, y: hipsY - R * 0.04 },
+      { x: cx - hipsHalf * 0.97, y: hipsY - R * 0.05 },
       { x: cx - hipsHalf, y: hipsY },
+      { x: cx - hipsHalf * 0.45, y: hipsY + R * 0.07 },
+      { x: cx, y: hipsY + R * 0.1 },
+      { x: cx + hipsHalf * 0.45, y: hipsY + R * 0.07 },
       { x: cx + hipsHalf, y: hipsY },
-      { x: cx + hipsHalf * 0.95, y: hipsY - R * 0.04 },
+      { x: cx + hipsHalf * 0.97, y: hipsY - R * 0.05 },
       { x: cx + waistHalf, y: waistY },
-      { x: cx + shoulderHalf * 0.75, y: shouldersY + R * 0.16 },
-      { x: cx + shoulderHalf * 0.95, y: shouldersY + R * 0.04 },
+      { x: cx + waistHalf * 1.25, y: cy - R * 0.14 },
+      { x: cx + shoulderHalf * 0.8, y: shouldersY + R * 0.16 },
+      { x: cx + shoulderHalf * 0.97, y: shouldersY + R * 0.07 },
       { x: cx + shoulderHalf, y: shouldersY }
-    ];
-    fillPoly(torsoPoly, d, INK);
+    ], true, INK, 5);
 
-    // ── Arm origins (slightly inboard of shoulder edges) ──
-    var shL = { x: cx - shoulderHalf + 2, y: shouldersY + 4 };
-    var shR = { x: cx + shoulderHalf - 2, y: shouldersY + 4 };
-
-    // ── Arms HORIZONTAL (Y-pose): shoulder → square sides at shoulder height ──
+    // ── Arms: horizontal pair to square sides + raised pair to the circle ──
+    var shL = { x: cx - shoulderHalf + 3, y: shouldersY + 5 };
+    var shR = { x: cx + shoulderHalf - 3, y: shouldersY + 5 };
     var armHorizL = { x: cx - sqHalf, y: shouldersY };
     var armHorizR = { x: cx + sqHalf, y: shouldersY };
-    fillPoly(limbPoly(shL, armHorizL, 9, 5), d, INK);
-    fillPoly(limbPoly(shR, armHorizR, 9, 5), d, INK);
+    var armRaisedL = { x: cx - Math.cos(raisedAng) * R, y: cy - Math.sin(raisedAng) * R };
+    var armRaisedR = { x: cx + Math.cos(raisedAng) * R, y: cy - Math.sin(raisedAng) * R };
+    function arm(sh, tip) {
+      // outline with bicep swell, elbow waist, forearm swell, wrist taper
+      var bicep = lerp(sh, tip, 0.28), elbow = lerp(sh, tip, 0.52), fore = lerp(sh, tip, 0.72);
+      flowLimb([sh, bicep, elbow, fore, tip], [8.5, 9.5, 5.5, 6.2, 2.6], INK);
+      flowCircle(tip.x, tip.y, 4.5, INK, 4.5);
+    }
+    arm(shL, armHorizL); arm(shR, armHorizR);
+    arm(shL, armRaisedL); arm(shR, armRaisedR);
 
-    // ── Arms LOWERED-OUT pose: shoulder → lower square corners ──
-    // (matches the reference image's lower arms; an alternative to raised V-pose)
-    var armLowerL = { x: cx - sqHalf, y: cy + R * 0.3 };
-    var armLowerR = { x: cx + sqHalf, y: cy + R * 0.3 };
-    fillPoly(limbPoly(shL, armLowerL, 9, 5), d, INK);
-    fillPoly(limbPoly(shR, armLowerR, 9, 5), d, INK);
-
-    // Optionally also raised pose (commented out — keeping ref-style)
-    // var armRaisedL = { x: cx - Math.sin(raisedAng) * R, y: cy - Math.cos(raisedAng) * R };
-    // var armRaisedR = { x: cx + Math.sin(raisedAng) * R, y: cy - Math.cos(raisedAng) * R };
-    // fillPoly(limbPoly(shL, armRaisedL, 9, 5), d, INK);
-    // fillPoly(limbPoly(shR, armRaisedR, 9, 5), d, INK);
-
-    // ── Hands at all 4 arm tips ──
-    [armHorizL, armHorizR, armLowerL, armLowerR].forEach(function (h) {
-      fillCircle(h.x, h.y, 7, d, INK);
-    });
-
-    // ── Hip origins ──
-    var hipL = { x: cx - hipsHalf * 0.55, y: hipsY };
-    var hipR = { x: cx + hipsHalf * 0.55, y: hipsY };
-
-    // ── Legs TOGETHER: hip → square bottom ──
-    var footTogetherL = { x: cx - hipsHalf * 0.55, y: feetY };
-    var footTogetherR = { x: cx + hipsHalf * 0.55, y: feetY };
-    fillPoly(limbPoly(hipL, footTogetherL, 11, 6), d, INK);
-    fillPoly(limbPoly(hipR, footTogetherR, 11, 6), d, INK);
-
-    // ── Legs SPREAD: hip → lower circle perimeter ──
+    // ── Legs: together pair to circle bottom + spread pair to the circle ──
+    var hipL = { x: cx - hipsHalf * 0.72, y: hipsY };
+    var hipR = { x: cx + hipsHalf * 0.72, y: hipsY };
+    var footTogetherL = { x: cx - hipsHalf * 0.42, y: feetY };
+    var footTogetherR = { x: cx + hipsHalf * 0.42, y: feetY };
     var footSpreadL = { x: cx - Math.sin(spreadAng) * R, y: cy + Math.cos(spreadAng) * R };
     var footSpreadR = { x: cx + Math.sin(spreadAng) * R, y: cy + Math.cos(spreadAng) * R };
-    fillPoly(limbPoly(hipL, footSpreadL, 11, 6), d, INK);
-    fillPoly(limbPoly(hipR, footSpreadR, 11, 6), d, INK);
-
-    // ── Feet at all 4 leg tips ──
-    [footTogetherL, footTogetherR, footSpreadL, footSpreadR].forEach(function (f) {
-      fillCircle(f.x, f.y, 8, d, INK);
-    });
-
-    // ── Heart (subtle terra accent in chest) ──
-    fillCircle(cx - R * 0.04, (shouldersY + waistY) / 2 + R * 0.03, 4, d * 0.9, TERRA);
-
-    // ── Navel marker at exact circle center ──
-    fillCircle(cx, cy, 3, d * 0.8, TERRA);
+    function leg(hip, foot, sgn) {
+      // outline with thigh swell, knee waist, calf swell, ankle taper
+      var thigh = lerp(hip, foot, 0.22), knee = lerp(hip, foot, 0.5), calf = lerp(hip, foot, 0.66);
+      flowLimb([hip, thigh, knee, calf, foot], [11, 12, 6, 7.5, 2.8], INK);
+      flowPoly([
+        { x: foot.x - sgn * 3, y: foot.y - 5 },
+        { x: foot.x - sgn * 3, y: foot.y },
+        { x: foot.x + sgn * 13, y: foot.y }
+      ], false, INK, 4);
+    }
+    leg(hipL, footTogetherL, -1); leg(hipR, footTogetherR, 1);
+    leg(hipL, footSpreadL, -1); leg(hipR, footSpreadR, 1);
 
     return roles;
   }
@@ -1237,9 +1219,9 @@
       [-6, -0.5, 1.5, 1.5, 14, 6, '#7a95ad', '#2e4a66'],
       [-1.5, -0.5, 1.6, 1.6, 18, 7, '#7a95ad', '#2e4a66'],
       [1.5, -0.5, 1.6, 1.6, 18, 7, '#7a95ad', '#2e4a66'],
-      [3.5, -0.5, 1.5, 1.5, 12, 5, '#a8c0d4', '#8fb0cc'],
-      [-4, 2.5, 1.5, 1.5, 10, 4, '#a8c0d4', '#8fb0cc'],
-      [1.5, 2.5, 1.5, 1.5, 10, 4, '#a8c0d4', '#8fb0cc']
+      [3.5, -0.5, 1.5, 1.5, 12, 5, '#8fb0cc', '#4a7196'],
+      [-4, 2.5, 1.5, 1.5, 10, 4, '#8fb0cc', '#4a7196'],
+      [1.5, 2.5, 1.5, 1.5, 10, 4, '#8fb0cc', '#4a7196']
     ];
     var trees = [[-2.5, 1], [2.5, 1], [-3, 4], [3, 4]];
     var agents = [];
@@ -1247,21 +1229,21 @@
       agents.push({
         gx: -6 + Math.random() * 12, gy: -3 + Math.random() * 7,
         vx: (Math.random() - 0.5) * 0.025, vy: (Math.random() - 0.5) * 0.025,
-        c: ['#8fb0cc', '#b69162', '#2e4a66', '#b96a56'][Math.floor(Math.random() * 4)]
+        c: ['#4a7196', '#b69162', '#2e4a66', '#b96a56'][Math.floor(Math.random() * 4)]
       });
     }
 
     function draw() {
       if (!running) { requestAnimationFrame(draw); return; }
-      ctx.fillStyle = '#56544f';
+      ctx.fillStyle = '#e3e0d8';
       ctx.fillRect(0, 0, W, H);
       // Grass base
       for (var gx = -7; gx < 6; gx++) {
-        for (var gy = -4; gy < 5; gy++) drawTile(gx, gy, '#787d66');
+        for (var gy = -4; gy < 5; gy++) drawTile(gx, gy, '#d3d7c6');
       }
       // Roads
-      for (var gx = -7; gx < 6; gx++) { drawTile(gx, -2, '#8c8880'); drawTile(gx, 1.5, '#8c8880'); }
-      for (var gy = -4; gy < 5; gy++) { drawTile(-3, gy, '#8c8880'); drawTile(0, gy, '#8c8880'); drawTile(3, gy, '#8c8880'); }
+      for (var gx = -7; gx < 6; gx++) { drawTile(gx, -2, '#b5b1a6'); drawTile(gx, 1.5, '#b5b1a6'); }
+      for (var gy = -4; gy < 5; gy++) { drawTile(-3, gy, '#b5b1a6'); drawTile(0, gy, '#b5b1a6'); drawTile(3, gy, '#b5b1a6'); }
       // Grid lines (very faint)
       ctx.strokeStyle = 'rgba(50, 48, 44, 0.05)'; ctx.lineWidth = 0.5;
       for (var gx = -7; gx <= 6; gx++) {
@@ -1317,8 +1299,8 @@
     var k2 = Math.PI / 3, k2T = Math.PI / 3;
     var dA = Math.PI * 1.5, dAT = Math.PI * 1.5;
 
-    var INK = '#eceae5', BG = '#615f5a';
-    var SAGE = '#8fb0cc', AMBER = '#b69162', TERRA = '#b96a56', SLATE = '#2e4a66', MOSS = '#8a8f6a';
+    var INK = '#3a3833', BG = '#eceae5';
+    var SAGE = '#4a7196', AMBER = '#b69162', TERRA = '#b96a56', SLATE = '#2e4a66', MOSS = '#8a8f6a';
 
     function draw() {
       if (!running) { requestAnimationFrame(draw); return; }
@@ -1509,8 +1491,8 @@
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
       cx = W / 2; cy = H / 2; R = Math.min(W, H) * 0.42;
     }
-    var INK = '#eceae5', BG = '#615f5a';
-    var SAGE = '#8fb0cc', TERRA = '#b96a56', AMBER = '#b69162', MOSS = '#8a8f6a';
+    var INK = '#3a3833', BG = '#eceae5';
+    var SAGE = '#4a7196', TERRA = '#b96a56', AMBER = '#b69162', MOSS = '#8a8f6a';
 
     function draw() {
       if (!running) { requestAnimationFrame(draw); return; }
@@ -1543,7 +1525,7 @@
       // Inscribed square (offset so navel = circle center)
       ctx.strokeRect(cx - sqHalf, headTopY, sqHalf * 2, bodyH);
       // Proportion lines
-      ctx.strokeStyle = 'rgba(143, 176, 204, 0.15)'; ctx.lineWidth = 0.5;
+      ctx.strokeStyle = 'rgba(74, 113, 150, 0.15)'; ctx.lineWidth = 0.5;
       [-0.42, -0.2, 0, 0.2, 0.42].forEach(function (off) {
         var y = cy + R * off;
         ctx.beginPath(); ctx.moveTo(cx - sqHalf + 4, y); ctx.lineTo(cx + sqHalf - 4, y); ctx.stroke();
@@ -1675,7 +1657,7 @@
   var engineCanvas = document.getElementById('engineCanvas');
   if (engineCanvas) {
     createDotCanvas(engineCanvas, [{ name: 'body', fn: engineRingScene }], {
-      N: 1100, dotAlpha: 0.78, dotSize: 1.5, trailAlpha: 0.12, cycle: false
+      N: 1600, dotAlpha: 0.85, dotSize: 1.5, trailAlpha: 0.1, cycle: false, padStatic: true
     });
   }
 
